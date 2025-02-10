@@ -10,7 +10,6 @@ import (
 	"github.com/PharmaKart/authentication-svc/pkg/utils"
 
 	"google.golang.org/grpc"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -20,9 +19,17 @@ func main() {
 	// Initialize logger
 	utils.InitLogger()
 
+	// Initialize database connection
+	db, err := utils.ConnectDB(cfg)
+	if err != nil {
+		utils.Logger.Fatal("Failed to connect to database", map[string]interface{}{
+			"error": err,
+		})
+	}
+
 	// Initialize repositories
-	userRepo := repositories.NewUserRepository(&gorm.DB{})
-	customerRepo := repositories.NewCustomerRepository(&gorm.DB{})
+	userRepo := repositories.NewUserRepository(db)
+	customerRepo := repositories.NewCustomerRepository(db)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(userRepo, customerRepo, cfg.JWTSecret)
