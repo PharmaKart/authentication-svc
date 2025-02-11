@@ -11,7 +11,7 @@ import (
 type AuthHandler interface {
 	Register(ctx context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error)
 	Login(ctx context.Context, req *proto.LoginRequest) (*proto.LoginResponse, error)
-	ValidateToken(ctx context.Context, req *proto.VerifyTokenRequest) (*proto.VerifyTokenResponse, error)
+	VerifyToken(ctx context.Context, req *proto.VerifyTokenRequest) (*proto.VerifyTokenResponse, error)
 }
 
 type authHandler struct {
@@ -59,8 +59,8 @@ func (h *authHandler) Login(ctx context.Context, req *proto.LoginRequest) (*prot
 	return &proto.LoginResponse{Success: true, Message: "Logged in Successfully", Token: token, Role: role, UserId: userid}, nil
 }
 
-func (h *authHandler) ValidateToken(ctx context.Context, req *proto.VerifyTokenRequest) (*proto.VerifyTokenResponse, error) {
-	userid, role, err := h.authService.ValidateToken(req.Token)
+func (h *authHandler) VerifyToken(ctx context.Context, req *proto.VerifyTokenRequest) (*proto.VerifyTokenResponse, error) {
+	userid, role, err := h.authService.VerifyToken(req.Token)
 
 	if err != nil {
 		return &proto.VerifyTokenResponse{Success: false, Message: err.Error(), Role: "", UserId: ""}, err

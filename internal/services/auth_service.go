@@ -9,9 +9,9 @@ import (
 )
 
 type AuthService interface {
-	Register(username, email, password, firstName, lastName, phone, dob, billing1, billing2, city, province, postalCode, country string) error
+	Register(username, email, password, firstName, lastName, phone, dob, streetLine1, streetLine2, city, province, postalCode, country string) error
 	Login(email, username, password string) (string, string, string, error)
-	ValidateToken(token string) (string, string, error)
+	VerifyToken(token string) (string, string, error)
 }
 
 type authService struct {
@@ -28,7 +28,7 @@ func NewAuthService(userRepo repositories.UserRepository, customerRepo repositor
 	}
 }
 
-func (s *authService) Register(username, email, password, firstName, lastName, phone, dob, billing1, billing2, city, province, postalCode, country string) error {
+func (s *authService) Register(username, email, password, firstName, lastName, phone, dob, streetLine1, streetLine2, city, province, postalCode, country string) error {
 	// Check if the user already exists
 	_, err := s.userRepo.GetUserByEmail(email)
 	if err == nil {
@@ -41,7 +41,7 @@ func (s *authService) Register(username, email, password, firstName, lastName, p
 	}
 
 	// Validate the user input
-	if err := utils.ValidateUserInput(username, email, password, firstName, lastName, phone, dob, billing1, city, province, postalCode, country); err != nil {
+	if err := utils.ValidateUserInput(username, email, password, firstName, lastName, phone, dob, streetLine1, city, province, postalCode, country); err != nil {
 		return err
 	}
 
@@ -75,17 +75,17 @@ func (s *authService) Register(username, email, password, firstName, lastName, p
 	}
 
 	customer := &models.Customer{
-		UserID:          userID,
-		FirstName:       firstName,
-		LastName:        lastName,
-		Phone:           &phone,
-		DateOfBirth:     &dobTime,
-		BillingAddress1: billing1,
-		BillingAddress2: &billing2,
-		City:            city,
-		Province:        province,
-		PostalCode:      postalCode,
-		Country:         country,
+		UserID:      userID,
+		FirstName:   firstName,
+		LastName:    lastName,
+		Phone:       &phone,
+		DateOfBirth: &dobTime,
+		StreetLine1: streetLine1,
+		StreetLine2: &streetLine2,
+		City:        city,
+		Province:    province,
+		PostalCode:  postalCode,
+		Country:     country,
 	}
 
 	_, err = s.customerRepo.CreateCustomer(customer)
@@ -135,7 +135,7 @@ func (s *authService) Login(email, username, password string) (string, string, s
 	return token, user.ID.String(), user.Role, nil
 }
 
-func (s authService) ValidateToken(token string) (string, string, error) {
+func (s authService) VerifyToken(token string) (string, string, error) {
 	userID, role, err := utils.ValidateJWT(token, s.jwtSecret)
 	if err != nil {
 		return "", "", err

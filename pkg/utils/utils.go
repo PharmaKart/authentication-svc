@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -80,8 +81,27 @@ func isValidEmail(email string) bool {
 }
 
 func isValidPassword(password string) bool {
-	re := regexp.MustCompile(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$`)
-	return re.MatchString(password)
+	if len(password) < 8 {
+		return false
+	}
+
+	var hasUpper, hasLower, hasDigit, hasSpecial bool
+	specialChars := regexp.MustCompile(`[@$!%*?&]`)
+
+	for _, char := range password {
+		switch {
+		case unicode.IsUpper(char):
+			hasUpper = true
+		case unicode.IsLower(char):
+			hasLower = true
+		case unicode.IsDigit(char):
+			hasDigit = true
+		case specialChars.MatchString(string(char)):
+			hasSpecial = true
+		}
+	}
+
+	return hasUpper && hasLower && hasDigit && hasSpecial
 }
 
 func isValidPhone(phone string) bool {
