@@ -13,7 +13,7 @@ phases:
     commands:
       - echo "Installing protoc..."
       - curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protoc-29.3-linux-x86_64.zip
-      - unzip protoc-21.12-linux-x86_64.zip -d $HOME/protoc
+      - unzip protoc-29.3-linux-x86_64.zip -d $HOME/protoc
       - export PATH="$HOME/protoc/bin:$PATH"
   pre_build:
     commands:
