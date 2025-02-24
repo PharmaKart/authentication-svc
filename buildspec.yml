@@ -8,16 +8,25 @@ env:
 
 phases:
   install:
-    runtime-versions:
-      docker: 20
+    commands:
+      - echo "Installing protoc..."
+      - curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protoc-29.3-linux-x86_64.zip
+      - unzip protoc-29.3-linux-x86_64.zip -d $HOME/protoc
+      - export PATH="$HOME/protoc/bin:$PATH"
+      - echo "Installing protoc-gen-go and protoc-gen-go-grpc..."
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+      - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+      - export PATH=$PATH:$(go env GOPATH)/bin
   pre_build:
     commands:
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   build:
     commands:
+      - echo Generating the gRPC code...
+      - make proto
       - echo Build started on date
       - echo Building the Docker image...
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
