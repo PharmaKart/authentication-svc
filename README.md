@@ -105,11 +105,11 @@ docker stop <container_id>
 The service requires the following environment variables. Create a `.env` file in the `authentication-svc` directory with the following:
 
 ```env
-AUTH_DB_HOST=postgres
-AUTH_DB_PORT=5432
-AUTH_DB_USER=postgres
-AUTH_DB_PASSWORD=yourpassword
-AUTH_DB_NAME=pharmakartdb
+DB_HOST=postgres
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=yourpassword
+DB_NAME=pharmakartdb
 JWT_SECRET=your-jwt-secret
 ```
 
