@@ -105,6 +105,7 @@ docker stop <container_id>
 The service requires the following environment variables. Create a `.env` file in the `authentication-svc` directory with the following:
 
 ```env
+PORT=50051
 DB_HOST=postgres
 DB_PORT=5432
 DB_USER=postgres
