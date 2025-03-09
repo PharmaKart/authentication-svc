@@ -2,120 +2,12 @@ package utils
 
 import (
 	"errors"
-	"regexp"
-	"strings"
 	"time"
-	"unicode"
 
+	"github.com/PharmaKart/authentication-svc/internal/proto"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
-
-func ValidateUserInput(username, email, password, firstName, lastName, phone, dob, billing1, city, province, postalCode, country string) error {
-	if strings.TrimSpace(username) == "" {
-		return errors.New("username is required")
-	}
-
-	if strings.TrimSpace(email) == "" {
-		return errors.New("email is required")
-	}
-	if !isValidEmail(email) {
-		return errors.New("invalid email format")
-	}
-
-	if strings.TrimSpace(password) == "" {
-		return errors.New("password is required")
-	}
-	if !isValidPassword(password) {
-		return errors.New("password must be at least 8 characters long and contain an uppercase letter, a lowercase letter, a digit, and a special character")
-	}
-
-	if strings.TrimSpace(firstName) == "" {
-		return errors.New("first name is required")
-	}
-
-	if strings.TrimSpace(lastName) == "" {
-		return errors.New("last name is required")
-	}
-
-	if strings.TrimSpace(phone) == "" {
-		return errors.New("phone number is required")
-	}
-	if !isValidPhone(phone) {
-		return errors.New("invalid phone number format")
-	}
-
-	if strings.TrimSpace(dob) == "" {
-		return errors.New("date of birth is required")
-	}
-	if !isValidDOB(dob) {
-		return errors.New("invalid date of birth or must be in the past")
-	}
-
-	if strings.TrimSpace(billing1) == "" {
-		return errors.New("billing address line 1 is required")
-	}
-
-	if strings.TrimSpace(city) == "" {
-		return errors.New("city is required")
-	}
-
-	if strings.TrimSpace(province) == "" {
-		return errors.New("province is required")
-	}
-
-	if strings.TrimSpace(postalCode) == "" {
-		return errors.New("postal code is required")
-	}
-
-	if strings.TrimSpace(country) == "" {
-		return errors.New("country is required")
-	}
-
-	return nil
-}
-
-func isValidEmail(email string) bool {
-	re := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
-	return re.MatchString(email)
-}
-
-func isValidPassword(password string) bool {
-	if len(password) < 8 {
-		return false
-	}
-
-	var hasUpper, hasLower, hasDigit, hasSpecial bool
-	specialChars := regexp.MustCompile(`[@$!%*?&]`)
-
-	for _, char := range password {
-		switch {
-		case unicode.IsUpper(char):
-			hasUpper = true
-		case unicode.IsLower(char):
-			hasLower = true
-		case unicode.IsDigit(char):
-			hasDigit = true
-		case specialChars.MatchString(string(char)):
-			hasSpecial = true
-		}
-	}
-
-	return hasUpper && hasLower && hasDigit && hasSpecial
-}
-
-func isValidPhone(phone string) bool {
-	re := regexp.MustCompile(`^\+?[0-9]{10,15}$`)
-	return re.MatchString(phone)
-}
-
-func isValidDOB(dob string) bool {
-	parsedDOB, err := time.Parse("2006-01-02", dob)
-	if err != nil {
-		return false
-	}
-	return parsedDOB.Before(time.Now())
-}
 
 func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -123,10 +15,6 @@ func HashPassword(password string) (string, error) {
 		return "", err
 	}
 	return string(hashedPassword), nil
-}
-
-func ParseDOB(dob string) (time.Time, error) {
-	return time.Parse("2006-01-02", dob)
 }
 
 func CheckPasswordHash(password, hash string) error {
@@ -182,4 +70,19 @@ func ValidateJWT(tokenString, secret string) (string, string, error) {
 	}
 
 	return userID, role, nil
+}
+
+func ConvertMapToKeyValuePairs(m map[string]string) []*proto.KeyValuePair {
+	if m == nil {
+		return nil
+	}
+
+	result := make([]*proto.KeyValuePair, 0, len(m))
+	for k, v := range m {
+		result = append(result, &proto.KeyValuePair{
+			Key:   k,
+			Value: v,
+		})
+	}
+	return result
 }

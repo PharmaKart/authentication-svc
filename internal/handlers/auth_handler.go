@@ -6,6 +6,8 @@ import (
 	"github.com/PharmaKart/authentication-svc/internal/proto"
 	"github.com/PharmaKart/authentication-svc/internal/repositories"
 	"github.com/PharmaKart/authentication-svc/internal/services"
+	"github.com/PharmaKart/authentication-svc/pkg/errors"
+	"github.com/PharmaKart/authentication-svc/pkg/utils"
 )
 
 type AuthHandler interface {
@@ -43,27 +45,83 @@ func (h *authHandler) Register(ctx context.Context, req *proto.RegisterRequest) 
 	)
 
 	if err != nil {
-		return &proto.RegisterResponse{Success: false, Message: err.Error()}, err
+		// Convert the app error to proto response
+		if appErr, ok := errors.IsAppError(err); ok {
+			return &proto.RegisterResponse{
+				Success: false,
+				Message: appErr.Message,
+				Error: &proto.Error{
+					Type:    string(appErr.Type),
+					Message: appErr.Message,
+					Details: utils.ConvertMapToKeyValuePairs(appErr.Details),
+				},
+			}, nil
+		}
+		return &proto.RegisterResponse{
+			Success: false,
+			Message: err.Error(),
+			Error: &proto.Error{
+				Type:    string(errors.InternalError),
+				Message: "An unexpected error occurred",
+			},
+		}, nil
 	}
 
 	return &proto.RegisterResponse{Success: true, Message: "Registered Successfully"}, nil
 }
 
 func (h *authHandler) Login(ctx context.Context, req *proto.LoginRequest) (*proto.LoginResponse, error) {
-	token, userid, role, err := h.authService.Login(req.Email, req.Username, req.Password)
+	token, userid, username, role, err := h.authService.Login(req.Email, req.Username, req.Password)
 
 	if err != nil {
-		return &proto.LoginResponse{Success: false, Message: err.Error(), Token: "", Role: "", UserId: ""}, err
+		// Convert the app error to proto response
+		if appErr, ok := errors.IsAppError(err); ok {
+			return &proto.LoginResponse{
+				Success: false,
+				Message: appErr.Message,
+				Error: &proto.Error{
+					Type:    string(appErr.Type),
+					Message: appErr.Message,
+					Details: utils.ConvertMapToKeyValuePairs(appErr.Details),
+				},
+			}, nil
+		}
+		return &proto.LoginResponse{
+			Success: false,
+			Message: err.Error(),
+			Error: &proto.Error{
+				Type:    string(errors.InternalError),
+				Message: "An unexpected error occurred",
+			},
+		}, nil
 	}
 
-	return &proto.LoginResponse{Success: true, Message: "Logged in Successfully", Token: token, Role: role, UserId: userid}, nil
+	return &proto.LoginResponse{Success: true, Message: "Logged in Successfully", Token: token, UserId: userid, Username: username, Role: role}, nil
 }
 
 func (h *authHandler) VerifyToken(ctx context.Context, req *proto.VerifyTokenRequest) (*proto.VerifyTokenResponse, error) {
 	userid, role, err := h.authService.VerifyToken(req.Token)
 
 	if err != nil {
-		return &proto.VerifyTokenResponse{Success: false, Message: err.Error(), Role: "", UserId: ""}, err
+		if appErr, ok := errors.IsAppError(err); ok {
+			return &proto.VerifyTokenResponse{
+				Success: false,
+				Message: appErr.Message,
+				Error: &proto.Error{
+					Type:    string(appErr.Type),
+					Message: appErr.Message,
+					Details: utils.ConvertMapToKeyValuePairs(appErr.Details),
+				},
+			}, nil
+		}
+		return &proto.VerifyTokenResponse{
+			Success: false,
+			Message: err.Error(),
+			Error: &proto.Error{
+				Type:    string(errors.InternalError),
+				Message: "An unexpected error occurred",
+			},
+		}, nil
 	}
 
 	return &proto.VerifyTokenResponse{Success: true, Message: "Token validated", Role: role, UserId: userid}, nil
