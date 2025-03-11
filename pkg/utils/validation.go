@@ -29,11 +29,11 @@ func ValidateUserInput(username, email, password, firstName, lastName, phone, do
 	}
 
 	if strings.TrimSpace(firstName) == "" {
-		validationErrors["firstName"] = "First name is required"
+		validationErrors["first_name"] = "First name is required"
 	}
 
 	if strings.TrimSpace(lastName) == "" {
-		validationErrors["lastName"] = "Last name is required"
+		validationErrors["last_name"] = "Last name is required"
 	}
 
 	if strings.TrimSpace(phone) == "" {
@@ -43,13 +43,13 @@ func ValidateUserInput(username, email, password, firstName, lastName, phone, do
 	}
 
 	if strings.TrimSpace(dob) == "" {
-		validationErrors["dateOfBirth"] = "Date of birth is required"
+		validationErrors["date_of_birth"] = "Date of birth is required"
 	} else if !isValidDOB(dob) {
-		validationErrors["dateOfBirth"] = "Invalid date of birth or must be in the past"
+		validationErrors["date_of_birth"] = "Invalid date of birth or must be in the past"
 	}
 
 	if strings.TrimSpace(billing1) == "" {
-		validationErrors["streetLine1"] = "Billing address line 1 is required"
+		validationErrors["street_line1"] = "Billing address line 1 is required"
 	}
 
 	if strings.TrimSpace(city) == "" {
@@ -61,9 +61,9 @@ func ValidateUserInput(username, email, password, firstName, lastName, phone, do
 	}
 
 	if strings.TrimSpace(postalCode) == "" {
-		validationErrors["postalCode"] = "Postal code is required"
+		validationErrors["postal_code"] = "Postal code is required"
 	} else if !regexp.MustCompile(`^[A-Z][0-9][A-Z] [0-9][A-Z][0-9]$`).MatchString(postalCode) {
-		validationErrors["postalCode"] = "Invalid postal code format"
+		validationErrors["postal_code"] = "Invalid postal code format"
 	}
 
 	if strings.TrimSpace(country) == "" {
@@ -112,7 +112,7 @@ func isValidPhone(phone string) bool {
 }
 
 func isValidDOB(dob string) bool {
-	parsedDOB, err := time.Parse("2006-01-02", dob)
+	parsedDOB, err := time.Parse(time.RFC3339, dob)
 	if err != nil {
 		return false
 	}
