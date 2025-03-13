@@ -120,5 +120,5 @@ func isValidDOB(dob string) bool {
 }
 
 func ParseDOB(dob string) (time.Time, error) {
-	return time.Parse("2006-01-02", dob)
+	return time.Parse(time.RFC3339, dob)
 }
