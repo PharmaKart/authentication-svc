@@ -20,7 +20,7 @@ type Customer struct {
 	Province    string    `gorm:"not null"`
 	PostalCode  string    `gorm:"not null"`
 	Country     string    `gorm:"not null;default:Canada"`
-	CreatedAt   time.Time `gorm:"default:now()"`
+	CreatedAt   time.Time `gorm:"type:timestamptz;default:now()"`
 }
 
 func (c *Customer) BeforeCreate(tx *gorm.DB) (err error) {
