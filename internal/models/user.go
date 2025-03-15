@@ -13,7 +13,7 @@ type User struct {
 	Email        string    `gorm:"unique;not null"`
 	PasswordHash string    `gorm:"not null"`
 	Role         string    `gorm:"type:varchar(50);not null;check:role IN ('customer', 'admin')"`
-	CreatedAt    time.Time `gorm:"default:now()"`
+	CreatedAt    time.Time `gorm:"type:timestamptz;default:now()"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
